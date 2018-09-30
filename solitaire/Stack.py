@@ -1,4 +1,5 @@
 from .Card import *
+from clint.textui import puts
 
 
 class Stack:
@@ -41,11 +42,6 @@ class Stack:
         return 'None'
 
     def move_top_to(self, column):
-        if column is self:
-            return False
-        if column is Waste:
-            return True
-
         return False
 
 
@@ -68,10 +64,11 @@ class Foundation(Stack):
             return False
 
         top_card = self.top()
-        if not self.suit == card.suit():
+        puts("MY SUIT: %s, their suit_text: %s" % (str(self.suit.name), card.suit_text()))
+        if self.suit.name != card.suit_text():
             return False
 
-        if (not top_card and card.rank() == 1) or top_card.rank() == card.rank() - 1:
+        if (not top_card and card.rank == 1) or top_card.rank == card.rank - 1:
             return True
 
         return False
@@ -82,25 +79,42 @@ class Foundation(Stack):
 
 class Column(Stack):
     def __init__(self, index):
-        self._visible_index = 0
+        self.first_visible_index = -1
         self.name = 'Column %s' % index
         super(Column, self).__init__()
+
+    def deal(self, card):
+        self.place(card)
+        self.first_visible_index += 1
 
     def can_place(self, card):
         top_card = self.top()
         if not top_card:
             return True
 
-        return card.color() != self.top().color() and card.rank() == self.top().rank() - 1
+        return card.color() != self.top().color() and card.rank == self.top().rank - 1
 
     def move_top_to(self, column):
-        top_card = self.top()
-        if not top_card:
+        if self.first_visible_index == -1:
             return False
 
-        if column.can_place(top_card):
-            self.pop()
-            column.place(top_card)
+        first_visible = self.cards[self.first_visible_index]
+        puts(first_visible.as_text())
+
+        if column.can_place(first_visible):
+
+            initial_num_cards = len(self.cards)
+            index_diff = initial_num_cards - self.first_visible_index
+            for i in range(self.first_visible_index, initial_num_cards):
+                column.place(self.cards[i])
+            for i in range(index_diff):
+                self.pop()
+
+            top_card = self.top()
+            if top_card:
+                top_card.flip()
+                self.first_visible_index -= 1
+
             return True
 
         return False
@@ -124,6 +138,23 @@ class Stock(Stack):
             return True
         return False
 
+    def move_top_to(self, column):
+        # Probably should refactor such that each pile as a 'receive' function
+        top_card = self.top()
+        # puts('wtf')
+        if not top_card:
+            # puts('wtf1')
+            return False
+
+        if column.can_place(top_card):
+            # puts('no way')
+            column.place(top_card)
+            self.pop()
+            return True
+        # puts('gaws')
+
+        return False
+
 
 class Waste(Stack):
     name = 'Discard'
@@ -133,3 +164,15 @@ class Waste(Stack):
 
     def can_remove(self):
         return True
+
+    def move_top_to(self, column):
+        top_card = self.top()
+        if not top_card:
+            return False
+
+        if column.can_place(top_card):
+            column.place(top_card)
+            self.pop()
+            return True
+
+        return False

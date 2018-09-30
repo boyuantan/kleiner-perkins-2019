@@ -8,6 +8,12 @@ class Suit(Enum):
     CLUB = 3
     SPADE = 4
 
+SUIT_IMAGES = {
+    Suit.HEART: '♥',
+    Suit.DIAMOND: '♦',
+    Suit.CLUB: '♣',
+    Suit.SPADE: '♠'
+}
 
 class Color(Enum):
     RED = auto()
@@ -24,7 +30,7 @@ class Rank(IntEnum):
 class Card:
     def __init__(self, suit, rank, face_up=False):
         self._suit = suit
-        self._rank = rank
+        self.rank = rank
         self._face_up = face_up
 
         if suit is Suit.HEART or suit is Suit.DIAMOND:
@@ -32,23 +38,24 @@ class Card:
         else:
             self._color = Color.BLACK
 
-    def suit(self):
+    def suit_text(self):
         return self._suit.name
 
     def color(self):
         return self._color
 
-    def rank(self):
-        if isinstance(self._rank, Rank):
-            return self._rank.name
+    def rank_text(self):
+        if isinstance(self.rank, Rank):
+            return self.rank.name
 
-        return self._rank
+        return str(self.rank)
 
     def as_text(self):
         if self._face_up:
             if self._color == Color.RED:
-                return colored.red(self.rank())
-            return colored.black(self.rank())
+                return colored.red(self.rank_text() + SUIT_IMAGES[self._suit])
+            else:
+                return colored.black(self.rank_text() + SUIT_IMAGES[self._suit])
         else:
             return '?'
 

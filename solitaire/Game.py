@@ -34,20 +34,27 @@ class Game:
     def game_loop(self):
         while True:
             command = prompt.query('>')
-            if command == 'help':
+            if command == 'restart':
+                self.setup()
+                self.print()
+            elif command == 'print':
+                self.print()
+            elif command == 'help':
                 puts('Pile Ids:')
                 for pile_id, pile in self.ids_to_piles.items():
                     puts(colored.blue("%s: " % pile_id) + pile.name)
                 puts('All commands:')
                 with indent(3, '>'):
-                    puts(colored.cyan('move x y') + ': moves the top card from pile x to pile y, where x and y are pile ids.')
+                    puts(colored.cyan('restart') + ': restarts the game.')
+                    puts(colored.cyan('print') + ': print the current state of the board.')
+                    puts(colored.cyan('mv x y') + ': moves the top card from pile x to pile y, where x and y are pile ids.')
                     puts(colored.cyan('discard') + ': puts the top card of the stock pile into discards.')
                     puts(colored.cyan('quit') + ': quits the game.')
-            elif command.startswith('move'):
+            elif command.startswith('mv'):
                 params = command.split(' ')
                 if len(params) != 3:
-                    self._error('Invalid: move must have 2 params.')
-                elif not self.ids_to_piles[params[1]] or not self.ids_to_piles[params[2]]:
+                    self._error('Invalid: mv must have 2 params.')
+                elif not self.ids_to_piles.get(params[1], False) or not self.ids_to_piles.get(params[2], False):
                     self._error('Invalid: params must be valid ids. Type ' + colored.cyan('help') + ' to see the list of valid ids.')
                 else:
                     move_from = self.ids_to_piles[params[1]]
@@ -67,7 +74,8 @@ class Game:
                             again = prompt.query('Type "y" to play again!')
                             if again == 'y':
                                 self.setup()
-                            break
+                            else:
+                                break
             elif command == 'quit':
                 break
             else:
@@ -97,10 +105,10 @@ class Game:
         for start_index in range(_NUM_COLUMNS):
             next_card = self.deck.get_next()
             next_card.flip()
-            self.columns[start_index].place(next_card)
+            self.columns[start_index].deal(next_card)
             for index in range(start_index + 1, _NUM_COLUMNS):
                 next_card = self.deck.get_next()
-                self.columns[index].place(next_card)
+                self.columns[index].deal(next_card)
 
         # Setup stock pile
         self.stock = Stock()
@@ -112,19 +120,19 @@ class Game:
 
         # Setup ids
         self.ids_to_piles = {
-            'd': self.waste,
+            'w': self.waste,
             'st': self.stock,
-            'c1': self.columns[0],
-            'c2': self.columns[1],
-            'c3': self.columns[2],
-            'c4': self.columns[3],
-            'c5': self.columns[4],
-            'c6': self.columns[5],
-            'c7': self.columns[6],
-            'fh': self.foundations[Suit.HEART],
-            'fd': self.foundations[Suit.DIAMOND],
-            'fc': self.foundations[Suit.CLUB],
-            'fs': self.foundations[Suit.SPADE]
+            '1': self.columns[0],
+            '2': self.columns[1],
+            '3': self.columns[2],
+            '4': self.columns[3],
+            '5': self.columns[4],
+            '6': self.columns[5],
+            '7': self.columns[6],
+            'h': self.foundations[Suit.HEART],
+            'd': self.foundations[Suit.DIAMOND],
+            'c': self.foundations[Suit.CLUB],
+            's': self.foundations[Suit.SPADE]
         }
 
     def print(self):
