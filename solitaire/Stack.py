@@ -1,6 +1,9 @@
 from .Card import *
 
+
 class Stack:
+    name = ''
+
     def __init__(self):
         self.cards = []
 
@@ -52,6 +55,7 @@ class Foundation(Stack):
     def __init__(self, suit):
         self.suit = suit
         self.full = False
+        self.name = suit.name + 'S'
         super(Foundation, self).__init__()
 
     def add(self, card):
@@ -77,8 +81,9 @@ class Foundation(Stack):
 
 
 class Column(Stack):
-    def __init__(self):
+    def __init__(self, index):
         self._visible_index = 0
+        self.name = 'Column %s' % index
         super(Column, self).__init__()
 
     def can_place(self, card):
@@ -86,7 +91,7 @@ class Column(Stack):
         if not top_card:
             return True
 
-        return card.color() != self.top().colour() and card.rank() == self.top().rank() - 1
+        return card.color() != self.top().color() and card.rank() == self.top().rank() - 1
 
     def move_top_to(self, column):
         top_card = self.top()
@@ -109,6 +114,8 @@ class Column(Stack):
 
 
 class Stock(Stack):
+    name = 'Stock'
+
     def can_place(self, card):
         return False
 
@@ -119,6 +126,8 @@ class Stock(Stack):
 
 
 class Waste(Stack):
+    name = 'Discard'
+
     def can_place(self, card):
         return True
 

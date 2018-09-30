@@ -1,21 +1,25 @@
 from clint.textui import colored
 from enum import Enum, IntEnum, auto
 
+
 class Suit(Enum):
     HEART = 1
     DIAMOND = 2
     CLUB = 3
     SPADE = 4
 
+
 class Color(Enum):
     RED = auto()
     BLACK = auto()
+
 
 class Rank(IntEnum):
     A = 1
     J = 11
     Q = 12
     K = 13
+
 
 class Card:
     def __init__(self, suit, rank, face_up=False):

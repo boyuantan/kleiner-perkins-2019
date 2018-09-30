@@ -6,10 +6,14 @@ from .Card import Suit, Rank, Color
 
 _NUM_COLUMNS = 7
 
+
 class Game:
 
     def __init__(self):
         self.setup()
+        self.print()
+
+        # Start game
         self.game_loop()
 
     def _error(self, error):
@@ -29,43 +33,46 @@ class Game:
 
     def game_loop(self):
         while True:
-            self.print()
             command = prompt.query('>')
             if command == 'help':
+                puts('Pile Ids:')
+                for pile_id, pile in self.ids_to_piles.items():
+                    puts(colored.blue("%s: " % pile_id) + pile.name)
                 puts('All commands:')
                 with indent(3, '>'):
-                    puts(colored.cyan('move x y') + ': moves the top card from pile x to pile y.')
+                    puts(colored.cyan('move x y') + ': moves the top card from pile x to pile y, where x and y are pile ids.')
                     puts(colored.cyan('discard') + ': puts the top card of the stock pile into discards.')
                     puts(colored.cyan('quit') + ': quits the game.')
             elif command.startswith('move'):
                 params = command.split(' ')
-                if len(params) != 2:
+                if len(params) != 3:
                     self._error('Invalid: move must have 2 params.')
                 elif not self.ids_to_piles[params[1]] or not self.ids_to_piles[params[2]]:
                     self._error('Invalid: params must be valid ids. Type ' + colored.cyan('help') + ' to see the list of valid ids.')
                 else:
                     move_from = self.ids_to_piles[params[1]]
                     move_to = self.ids_to_piles[params[2]]
-                    if not self.columns[move_from].move_top_to(move_to):
+                    if not move_from.move_top_to(move_to):
                         self._error('Invalid play.')
+                    else:
+                        self.print()
+                        win = True
+                        for _, foundation in self.foundations.items():
+                            if not foundation.full:
+                                win = False
+                                break
 
-                win = True
-                for foundation in self.foundations:
-                    if not foundation.full:
-                        win = False
-                        break
-
-                if win:
-                    puts(colored.green('Congratulations, you have won the game!'))
-                    again = prompt.query('Type "y" to play again!')
-                    if again == 'y':
-                        self.setup()
-                    break
-
-            if command == 'quit':
+                        if win:
+                            puts(colored.green('Congratulations, you have won the game!'))
+                            again = prompt.query('Type "y" to play again!')
+                            if again == 'y':
+                                self.setup()
+                            break
+            elif command == 'quit':
                 break
             else:
-                self._error('Invalid command.  Type ' + colored.cyan('help') + ' to see all available commands.')
+                self._error('Invalid command.')
+                puts('Type ' + colored.cyan('help') + ' to see all available commands.')
 
     def setup(self):
         self.deck = Deck()
@@ -84,22 +91,22 @@ class Game:
         # Setup column piles
         self.columns = []
         for i in range(_NUM_COLUMNS):
-            self.columns.append(Column())
+            self.columns.append(Column(i + 1))
 
         # Deal cards
         for start_index in range(_NUM_COLUMNS):
             next_card = self.deck.get_next()
-            next_card.flip(False)
+            next_card.flip()
             self.columns[start_index].place(next_card)
             for index in range(start_index + 1, _NUM_COLUMNS):
                 next_card = self.deck.get_next()
-                next_card.flip()
                 self.columns[index].place(next_card)
 
         # Setup stock pile
         self.stock = Stock()
         card = self.deck.get_next()
         while card:
+            card.flip()
             self.stock.place(card)
             card = self.deck.get_next()
 
@@ -126,4 +133,4 @@ class Game:
         for index, column in enumerate(self.columns):
             puts(colored.blue("Column %d: " % (index + 1)) + column.print())
         for key, foundation in self.foundations.items():
-            puts(colored.blue("%s: " % key) + foundation.print())
+            puts(colored.blue("%s: " % key.name) + foundation.print())
