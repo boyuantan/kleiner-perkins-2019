@@ -1,6 +1,7 @@
 # Kleiner Perkins Fellows Application
 
-This repository contains my Summer 2019 application for the Kleiner Perkins fellowship.
+This repository contains my Summer 2019 application for the Kleiner Perkins fellowship.  I have chosen to implement a 
+version of Solitaire for my supplementary application.
 
 ## Solitaire
 
@@ -48,6 +49,16 @@ using at work.  Since implementing Solitaire is a good way to learn a language, 
 this learning.  Furthermore, as Python is less restricted with its levels of class privacy, it forces one to think 
 harder about class structure and best practices with regards to naming conventions, etc.--which is always a good 
 challenge to have.
+
+In terms of design, I chose to separate the game into distinct classes for the `Game`, `Stack`, `Deck`, and `Card`.  I
+wanted a separation of concerns--especially for UI purposes, each class should be responsible for printing only 
+information relative to itself and no other.  As such, `Game` is responsible for only handling user inputs/commands, and 
+takes ownership over all `Stack`s present in the game as well as a `Deck` of cards.  The purpose of the `Deck` is mostly
+to keep track of `Card`s during the dealing process.  Within `Stack.py`, all `Stack`s are children of an abstract base
+class in order to avoid writing duplicate code for certain functionalities.  Each `Stack` should be responsible and have 
+unique requirements for when/if a card can be moved off it, and when/it can be moved onto another stack.  Finally, the 
+`Card` class is responsible for keeping track of its own information with regards to a card's suit, rank, colour,
+visibility to the player, etc.
 
 ### Credits
 I used the `clint` module to support my development of this project.  View the repo [here](https://github.com/kennethreitz/clint).
