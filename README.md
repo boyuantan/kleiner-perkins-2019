@@ -23,10 +23,8 @@ The image below is an example of the gameplay board.
 To see all available commands and pile identifiers, simply type `help`.
 
 ### The Piles
-- **Stock**: This pile contains the additional cards that have yet to been dealt.
-In order to view the next card of this pile, `mv st w`, where `st` is the id for the stock pile
-and `w` is the id for the waste pile.
-- **Waste**: This pile contains the discarded cards.
+- **Stock**: This pile contains the additional cards that have yet to been dealt.  You can see three at a time, but can
+only perform action on the top card.  Use `draw` to see the next card in the stock.
 - **Columns**: There are seven columns, identified by their ids (from 1 to 7).  To move all visible cards
 from one column to another, use `mv x y`, where `x` is the id of the origin pile
 and `y` is the id of the target pile.
@@ -41,6 +39,7 @@ following issues that I should seek to resolve upon continuing this implementati
 The user should ideally be able to move any number of cards from a column to another. 
 Although with the current implementation it would be easy to allow the user to specify an index at which all cards
 should be moved, it is not ideal from the user experience perspective.
+- No point tracking/time tracking was implemented for the game; you either win or you don't.
 - No test suites were set up for this game.  
 
 ### Discussion and Justification
@@ -49,3 +48,6 @@ using at work.  Since implementing Solitaire is a good way to learn a language, 
 this learning.  Furthermore, as Python is less restricted with its levels of class privacy, it forces one to think 
 harder about class structure and best practices with regards to naming conventions, etc.--which is always a good 
 challenge to have.
+
+### Credits
+I used the `clint` module to support my development of this project.  View the repo [here](https://github.com/kennethreitz/clint).

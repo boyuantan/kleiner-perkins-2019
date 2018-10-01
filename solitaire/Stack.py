@@ -1,3 +1,5 @@
+import random
+
 from .Card import *
 from clint.textui import puts
 
@@ -42,6 +44,15 @@ class Stack:
         return 'None'
 
     def move_top_to(self, column):
+        top_card = self.top()
+        if not top_card:
+            return False
+
+        if column.can_place(top_card):
+            column.place(top_card)
+            self.pop()
+            return True
+
         return False
 
 
@@ -64,7 +75,6 @@ class Foundation(Stack):
             return False
 
         top_card = self.top()
-        puts("MY SUIT: %s, their suit_text: %s" % (str(self.suit.name), card.suit_text()))
         if self.suit.name != card.suit_text():
             return False
 
@@ -90,12 +100,31 @@ class Column(Stack):
     def can_place(self, card):
         top_card = self.top()
         if not top_card:
-            return True
+            return card.rank == Rank.K
 
         return card.color() != self.top().color() and card.rank == self.top().rank - 1
 
     def move_top_to(self, column):
         if self.first_visible_index == -1:
+            return False
+
+        if isinstance(column, Foundation):
+            # If moving to a foundation pile, ONLY take the top card.
+            top_card = self.top()
+
+            if column.can_place(top_card):
+                column.place(top_card)
+                self.pop()
+
+                # Update first visible and visibility of top card if it's the only visible on stack.
+                if self.first_visible_index == len(self.cards):
+                    self.first_visible_index -= 1
+                    new_top = self.top()
+                    if new_top:
+                        self.top().flip()
+
+                return True
+
             return False
 
         first_visible = self.cards[self.first_visible_index]
@@ -128,7 +157,21 @@ class Column(Stack):
 
 
 class Stock(Stack):
+    waste = []
     name = 'Stock'
+
+    def draw(self):
+        if len(self.cards) > 3:
+            top_card = self.top()
+            self.pop()
+            self.waste.append(top_card)
+            return True
+        else:
+            self.cards.extend(self.waste)
+            random.shuffle(self.cards)
+            self.waste = []
+            return False
+
 
     def can_place(self, card):
         return False
@@ -139,33 +182,6 @@ class Stock(Stack):
         return False
 
     def move_top_to(self, column):
-        # Probably should refactor such that each pile as a 'receive' function
-        top_card = self.top()
-        # puts('wtf')
-        if not top_card:
-            # puts('wtf1')
-            return False
-
-        if column.can_place(top_card):
-            # puts('no way')
-            column.place(top_card)
-            self.pop()
-            return True
-        # puts('gaws')
-
-        return False
-
-
-class Waste(Stack):
-    name = 'Discard'
-
-    def can_place(self, card):
-        return True
-
-    def can_remove(self):
-        return True
-
-    def move_top_to(self, column):
         top_card = self.top()
         if not top_card:
             return False
@@ -176,3 +192,16 @@ class Waste(Stack):
             return True
 
         return False
+
+    def print(self):
+        num_cards = len(self.cards)
+        text = ''
+        if num_cards >= 3:
+            # Always show first three cards
+            for i in range(num_cards - 3, num_cards):
+                text += self.cards[i].as_text()
+        else:
+            for i in num_cards:
+                text += self.cards[i].as_text()
+
+        return text

@@ -1,6 +1,6 @@
 from clint.textui import puts, colored, indent, columns, prompt
 
-from .Stack import Foundation, Stock, Waste, Column
+from .Stack import Foundation, Stock, Column
 from .Deck import Deck
 from .Card import Suit, Rank, Color
 
@@ -47,9 +47,13 @@ class Game:
                 with indent(3, '>'):
                     puts(colored.cyan('restart') + ': restarts the game.')
                     puts(colored.cyan('print') + ': print the current state of the board.')
+                    puts(colored.cyan('draw')) + ': draw a card from stock.'
                     puts(colored.cyan('mv x y') + ': moves the top card from pile x to pile y, where x and y are pile ids.')
                     puts(colored.cyan('discard') + ': puts the top card of the stock pile into discards.')
                     puts(colored.cyan('quit') + ': quits the game.')
+            elif command == 'draw':
+                self.stock.draw()
+                self.print()
             elif command.startswith('mv'):
                 params = command.split(' ')
                 if len(params) != 3:
@@ -93,9 +97,6 @@ class Game:
         self.foundations[Suit.CLUB] = Foundation(Suit.CLUB)
         self.foundations[Suit.SPADE] = Foundation(Suit.SPADE)
 
-        # Setup waste pile
-        self.waste = Waste()
-
         # Setup column piles
         self.columns = []
         for i in range(_NUM_COLUMNS):
@@ -120,7 +121,6 @@ class Game:
 
         # Setup ids
         self.ids_to_piles = {
-            'w': self.waste,
             'st': self.stock,
             '1': self.columns[0],
             '2': self.columns[1],
@@ -137,7 +137,6 @@ class Game:
 
     def print(self):
         puts(colored.blue("Stock: ", False, True) + self.stock.print())
-        puts(colored.blue("Waste: ", False, True) + self.waste.print())
         for index, column in enumerate(self.columns):
             puts(colored.blue("Column %d: " % (index + 1)) + column.print())
         for key, foundation in self.foundations.items():
